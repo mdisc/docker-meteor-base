@@ -18,11 +18,14 @@ COPY entrypoint.sh /usr/bin/entrypoint.sh
 
 RUN chmod +x /usr/bin/entrypoint.sh
 
-ENV NODE_TLS_REJECT_UNAUTHORIZED 0
+# Allow these to be overridden by children
+ONBUILD ENV ROOT_URL http://127.0.0.1
+ONBUILD ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 
 ONBUILD ARG METEOR_APP_PATH=.
-
 ONBUILD ADD ${METEOR_APP_PATH} /home/meteor/src
+ONBUILD ARG GIT_HASH
+ONBUILD LABEL git-commit=$GIT_HASH
 
 ONBUILD RUN /usr/bin/entrypoint.sh
 
