@@ -1,19 +1,4 @@
 #!/bin/bash
-# Set default settings, pull repository, build
-# app, etc., _if_ we are not given a different
-# command.  If so, execute that command instead.
-set -e
-
-# Default values
-YOURS_HOME="/home/meteor"
-APP_DIR="${YOURS_HOME}/www" # Location of built Meteor app
-SRC_DIR="${YOURS_HOME}/new-src" # Location of Meteor app source
-INITIAL_SRC_DIR="${YOURS_HOME}/src" # Location of Meteor app source
-
-# Make sure critical directories exist
-mkdir -p $APP_DIR
-mkdir -p $SRC_DIR
-mkdir -p $INITIAL_SRC_DIR
 
 # Fix npm so it will correctly install without EXDEV errors
 # see https://github.com/npm/npm/issues/9863,
@@ -22,6 +7,7 @@ mkdir -p $INITIAL_SRC_DIR
 # for more info
 echo "copying app to avoid trixsy EXDEV issues"
 cp -R $INITIAL_SRC_DIR $SRC_DIR
+rm -rf $INITIAL_SRC_DIR
 
 
 # See if we have a valid meteor source
@@ -30,20 +16,6 @@ METEOR_DIR=$(find ${SRC_DIR} -type d -name .meteor -print |head -n1)
 if [ -e "${METEOR_DIR}" ]; then
    echo "Meteor source found in ${METEOR_DIR}"
    cd ${METEOR_DIR}/..
-
-   # Check Meteor version
-   echo "Checking Meteor version..."
-   RELEASE=$(cat .meteor/release | cut -f2 -d'@')
-
-   # Download Meteor installer
-   echo "Downloading Meteor install script..."
-   curl ${CURL_OPTS} -o /tmp/meteor.sh https://install.meteor.com/
-
-   # Install Meteor tool
-   echo "Installing Meteor ${RELEASE}..."
-   sed -i "s/^RELEASE=.*/RELEASE=${RELEASE}/" /tmp/meteor.sh
-   sh /tmp/meteor.sh
-   rm /tmp/meteor.sh
 
    if [ -f package.json ]; then
       echo "Installing application-side NPM dependencies..."
@@ -82,7 +54,3 @@ if [ ! -e ${BUNDLE_DIR}/main.js ]; then
    echo "Failed to locate main.js in ${BUNDLE_DIR}; cannot start application."
    exit 1
 fi
-
-echo "uninstalling meteor"
-rm -rf /usr/local/bin/meteor
-rm -rf ~/.meteor

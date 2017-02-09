@@ -13,21 +13,34 @@ RUN apt-get update && \
 
 WORKDIR /home/meteor
 
-## Install entrypoint
-COPY entrypoint.sh /usr/bin/entrypoint.sh
 
-RUN chmod +x /usr/bin/entrypoint.sh
+ENV YOURS_HOME "/home/meteor"
+ENV APP_DIR "${YOURS_HOME}/www"
+ENV SRC_DIR "${YOURS_HOME}/new-src"
+ENV INITIAL_SRC_DIR "${YOURS_HOME}/src"
 
-# Allow these to be overridden by children
+# Make sure critical directories exist
+RUN mkdir -p $APP_DIR
+RUN mkdir -p $SRC_DIR
+RUN mkdir -p $INITIAL_SRC_DIR
+
+## Install meteor
+COPY install-meteor.sh /usr/bin/install-meteor.sh
+RUN chmod +x /usr/bin/install-meteor.sh
+RUN /usr/bin/install-meteor.sh
+
+## Add script to remove meteor after the app is built
+COPY rm-meteor.sh /usr/bin/rm-meteor.sh
+RUN chmod +x /usr/bin/rm-meteor.sh
+
+## Add script to build the app once it is added
+COPY build-app.sh /usr/bin/build-app.sh
+RUN chmod +x /usr/bin/build-app.sh
+
+# Allow these to be overridden by children but set defaults
 ONBUILD ENV ROOT_URL http://127.0.0.1
 ONBUILD ENV NODE_TLS_REJECT_UNAUTHORIZED 0
-
-ONBUILD ARG METEOR_APP_PATH=.
-ONBUILD ADD ${METEOR_APP_PATH} /home/meteor/src
-ONBUILD ARG GIT_HASH
-ONBUILD LABEL git-commit=$GIT_HASH
-
-ONBUILD RUN /usr/bin/entrypoint.sh
+ONBUILD ENV METEOR_ALLOW_SUPERUSER true
 
 # we use the exec form of ENTRYPOINT so our our node process is running as pid 1
 # `docker stop` sends SIGTERM to pid 1. This means we can gracefully handle
