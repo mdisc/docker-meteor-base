@@ -2,15 +2,12 @@
 
 This is a base docker image for our Meteor applications.
 
-This image expects your meteor app to be in the same directory you give to `docker build`. If your meteor app lives in a different directory, you can define a `METEOR_APP_PATH` build argument with the relative path from where you are running `docker build`, like this:
+It installs Meteor and adds scripts for building your Meteor app and cleaning up Meteor and it's dependencies.
 
-```bash
-docker build . --build-args METEOR_APP_PATH=./app
-```
+It makes a few assumptions about what inheriting images will do.
 
-Also, this image is built with the intention that you'll install other stuff via apt-get, so we don't clean up after ourselves. Adding a line like this to your child Dockerfile should help:
+0. The meteor app must be added to `/home/meteor/src`
+0. After adding the app, you must `RUN /usr/bin/build-app.sh`
+0. After adding the app, you must `RUN /usr/bin/cleanup.sh`
 
-```
-RUN apt-get clean && \
-	rm -Rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-```
+It will start the app with `exec` mode, so your app will be running as PID 1 and can handle `SIGTERM`.

@@ -5,11 +5,9 @@ RUN mkdir -p /home/meteor
 
 # Install git, curl, node
 RUN apt-get update && \
-	apt-get install -y git curl build-essential && \
+	apt-get install -y curl build-essential && \
 	(curl https://deb.nodesource.com/setup_4.x | bash) && \
-	apt-get install -y \
-    nodejs \
-    jq
+	apt-get install -y nodejs
 
 WORKDIR /home/meteor
 
@@ -29,9 +27,9 @@ COPY install-meteor.sh /usr/bin/install-meteor.sh
 RUN chmod +x /usr/bin/install-meteor.sh
 RUN /usr/bin/install-meteor.sh
 
-## Add script to remove meteor after the app is built
-COPY rm-meteor.sh /usr/bin/rm-meteor.sh
-RUN chmod +x /usr/bin/rm-meteor.sh
+## Add script to clean up deps once we have built our meteor app
+COPY rm-meteor.sh /usr/bin/cleanup.sh
+RUN chmod +x /usr/bin/cleanup.sh
 
 ## Add script to build the app once it is added
 COPY build-app.sh /usr/bin/build-app.sh
