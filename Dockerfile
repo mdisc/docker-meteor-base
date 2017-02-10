@@ -9,8 +9,12 @@ RUN apt-get update && \
 	(curl https://deb.nodesource.com/setup_4.x | bash) && \
 	apt-get install -y nodejs
 
-WORKDIR /home/meteor
+## Install meteor
+COPY install-meteor.sh /usr/bin/install-meteor.sh
+RUN chmod +x /usr/bin/install-meteor.sh
+RUN /usr/bin/install-meteor.sh
 
+WORKDIR /home/meteor
 
 ENV YOURS_HOME "/home/meteor"
 ENV APP_DIR "${YOURS_HOME}/www"
@@ -22,13 +26,8 @@ RUN mkdir -p $APP_DIR
 RUN mkdir -p $SRC_DIR
 RUN mkdir -p $INITIAL_SRC_DIR
 
-## Install meteor
-COPY install-meteor.sh /usr/bin/install-meteor.sh
-RUN chmod +x /usr/bin/install-meteor.sh
-RUN /usr/bin/install-meteor.sh
-
 ## Add script to clean up deps once we have built our meteor app
-COPY rm-meteor.sh /usr/bin/cleanup.sh
+COPY cleanup.sh /usr/bin/cleanup.sh
 RUN chmod +x /usr/bin/cleanup.sh
 
 ## Add script to build the app once it is added
