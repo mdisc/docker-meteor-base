@@ -44,5 +44,4 @@ ONBUILD ENV METEOR_ALLOW_SUPERUSER true
 # containers being stopped
 # NOTE: It looks like we are leaving some zombie processes when running as PID 1
 # Switch back to this when zombie processes are figured out
-#ENTRYPOINT ["node", "--max-old-space-size=2048", "/home/meteor/www/bundle/main.js"]
-ENTRYPOINT node --max-old-space-size=2048 /home/meteor/www/bundle/main.js
+ENTRYPOINT ["node", "--max-old-space-size=2048", "/home/meteor/www/bundle/main.js"]
